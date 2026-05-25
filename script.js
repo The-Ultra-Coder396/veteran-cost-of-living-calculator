@@ -1,8 +1,8 @@
 /* ==========================================================================
    CONSTANTS & BASIC CONFIGURATION
    ========================================================================== */
-const VA_RATE = 6.125;         // Hardcoded 2026 benchmark VA loan interest rate
-const CONV_RATE = 6.75;       // Comparative conventional loan interest rate 
+const VA_RATE = 6.0;         // Hardcoded 2026 benchmark VA loan interest rate
+const CONV_RATE = 6.5;       // Comparative conventional loan interest rate 
 const LOAN_TERM = 30;        // 30-Year fixed rate timeline matrix
 const PMI_RATE = 0.008;      // Standard conventional private mortgage insurance rate (0.8%)
 const MAP_VIEWBOX = { width: 1000, height: 589 };
@@ -42,7 +42,7 @@ const CITY_DATA = {
         vaWaitTimePrimary: 31,
         vaWaitTimeSpecialty: 68,
         vaHealthcareScore: "Moderate",
-        foreclosureRiskNote: "Post-VASP defaults are rising across Southern California as pandemic-era protections run dry.",
+        foreclosureRiskNote: "Post-VAPC implementation delays are rising across Southern California as pandemic-era protections run dry.",
         pcsNote: "Sellers here will not wait for delayed military command approvals or extended escrow friction.",
         retiredNote: "Extreme state tax penalties and unyielding prices create an uphill battle for fixed pension structures.",
         appraisalGapRisk: "Very High",
@@ -118,7 +118,7 @@ const CITY_DATA = {
         vaWaitTimePrimary: 18,
         vaWaitTimeSpecialty: 38,
         vaHealthcareScore: "Good",
-        foreclosureRiskNote: "Pockets of high inventory shield the area from immediate post-VASP localized panics.",
+        foreclosureRiskNote: "Pockets of high inventory shield the area from local market strains due to VAPC implementation delays.",
         pcsNote: "Corporate shifts distort standard pricing models, but military timelines remain manageable.",
         retiredNote: "Texas income tax rules favor pensions, though uncapped property tax metrics demand careful attention.",
         appraisalGapRisk: "Low-Moderate",
@@ -219,9 +219,19 @@ const CITY_POSITIONS = {
 /* ==========================================================================
    HELPER UTILITIES
    ========================================================================== */
-function calculateFundingFee(homePrice, disability, usage) {
+function calculateFundingFee(homePrice, disability, usage, downPayment) {
     if (disability === "yes") return 0;
-    return usage === "first" ? Math.round(homePrice * 0.0215) : Math.round(homePrice * 0.033);
+    
+    let rate = 0;
+    if (downPayment >= 10) {
+        rate = 0.0125; // 1.25% for 10%+ down
+    } else if (downPayment >= 5) {
+        rate = 0.0150; // 1.50% for 5%+ down
+    } else {
+        rate = usage === "first" ? 0.0215 : 0.033;
+    }
+    
+    return Math.round(homePrice * rate);
 }
 
 function calculateMonthlyPayment(principal, annualRate, years) {
@@ -294,6 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('input[name="status"][value="active"]').checked = true;
         document.querySelector('input[name="disability"][value="no"]').checked = true;
         document.querySelector('input[name="usage"][value="first"]').checked = true;
+        document.querySelector('input[name="downpayment"][value="0"]').checked = true;
         priceSlider.value = 400000;
         priceDisplay.textContent = "$400,000";
         
@@ -322,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         markInputsChanged();
     });
 
-    document.querySelectorAll('input[name="status"], input[name="disability"], input[name="usage"]').forEach(input => {
+    document.querySelectorAll('input[name="status"], input[name="disability"], input[name="usage"], input[name="downpayment"]').forEach(input => {
         input.addEventListener('change', markInputsChanged);
     });
 
@@ -370,10 +381,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const status = document.querySelector('input[name="status"]:checked').value;
         const disability = document.querySelector('input[name="disability"]:checked').value;
         const usage = document.querySelector('input[name="usage"]:checked').value;
+        const downPaymentPercent = parseInt(document.querySelector('input[name="downpayment"]:checked').value);
 
         // Mathematical Evaluation Block
-        const fundingFeeAmount = calculateFundingFee(homePrice, disability, usage);
-        const totalVALoan = homePrice + fundingFeeAmount;
+        const downPaymentAmount = Math.round(homePrice * (downPaymentPercent / 100));
+        const loanAmountBeforeFee = homePrice - downPaymentAmount;
+        const fundingFeeAmount = calculateFundingFee(homePrice, disability, usage, downPaymentPercent);
+        const totalVALoan = loanAmountBeforeFee + fundingFeeAmount;
         const vaMonthlyPI = calculateMonthlyPayment(totalVALoan, VA_RATE, LOAN_TERM);
 
         const convLoanAmount = homePrice * 0.95; // 5% Down system tracking
@@ -382,13 +396,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const convMonthlyTotal = convMonthlyPI + monthlyPMI;
         
         const monthlySavings = convMonthlyTotal - vaMonthlyPI;
-        const estimatedCashNeeded = Math.round(homePrice * city.cashNeededEstimate);
+        const estimatedCashNeeded = Math.round(homePrice * city.cashNeededEstimate) + downPaymentAmount;
 
         /* --- UI Render Layer: Advertised HTML Column --- */
         document.getElementById('advertised-content').innerHTML = `
             <div class="stat-row">
                 <span class="stat-label">Down Payment</span>
-                <span class="stat-value green">$0</span>
+                <span class="stat-value ${downPaymentPercent > 0 ? 'blue' : 'green'}">${formatCurrency(downPaymentAmount)} (${downPaymentPercent}%)</span>
             </div>
             <div class="stat-row">
                 <span class="stat-label">Monthly PMI</span>
@@ -400,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="stat-row">
                 <span class="stat-label">Cash at Closing</span>
-                <span class="stat-value green">$0 (seller concessions available)</span>
+                <span class="stat-value green">${formatCurrency(downPaymentAmount)} (plus seller concessions)</span>
             </div>
             <div class="stat-row">
                 <span class="stat-label">Seller Acceptance</span>
@@ -418,17 +432,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="stat-label">VA Funding Fee</span>
                     <span class="stat-value green">$0 — Your 10%+ rating waives this entirely</span>
                 </div>`;
-        } else if (usage === 'first') {
-            realityHTML += `
-                <div class="stat-row">
-                    <span class="stat-label">VA Funding Fee</span>
-                    <span class="stat-value red">${formatCurrency(fundingFeeAmount)} (2.15%) added to your loan balance on day one</span>
-                </div>`;
         } else {
+            let feeRateText = "";
+            if (downPaymentPercent >= 10) feeRateText = "1.25%";
+            else if (downPaymentPercent >= 5) feeRateText = "1.50%";
+            else feeRateText = usage === "first" ? "2.15%" : "3.3%";
+
             realityHTML += `
                 <div class="stat-row">
                     <span class="stat-label">VA Funding Fee</span>
-                    <span class="stat-value red">${formatCurrency(fundingFeeAmount)} (3.3%) — repeat use penalty, starts as debt immediately</span>
+                    <span class="stat-value red">${formatCurrency(fundingFeeAmount)} (${feeRateText}) added to your loan balance on day one</span>
                 </div>`;
         }
 
@@ -438,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (estimatedCashNeeded <= 0) {
             cashColor = 'green';
             cashText = "Minimal — seller concessions are realistic here";
-        } else if (estimatedCashNeeded <= 5000) {
+        } else if (estimatedCashNeeded <= (5000 + downPaymentAmount)) {
             cashColor = 'amber';
         }
         realityHTML += `
@@ -497,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
             realityHTML += `<div class="warning-row">📉 <strong>Pension Income Risk:</strong> ${city.retiredNote}</div>`;
         }
         if (disability === 'yes') {
-            realityHTML += `<div class="warning-row">🔍 <strong>Exemption ≠ Appraisal Protection:</strong> Your funding fee waiver saves ${formatCurrency(calculateFundingFee(homePrice, 'no', usage))} but doesn't resolve the VA appraisal requirement. In ${city.marketTier} markets, sellers routinely reject VA offers due to appraisal and repair contingencies.</div>`;
+            realityHTML += `<div class="warning-row">🔍 <strong>Exemption ≠ Appraisal Protection:</strong> Your funding fee waiver saves ${formatCurrency(calculateFundingFee(homePrice, 'no', usage, downPaymentPercent))} but doesn't resolve the VA appraisal requirement. In ${city.marketTier} markets, sellers routinely reject VA offers due to appraisal and repair contingencies.</div>`;
         }
 
         document.getElementById('reality-content').innerHTML = realityHTML;
