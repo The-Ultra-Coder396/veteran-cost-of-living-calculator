@@ -442,29 +442,30 @@ input[type="range"] {
     display: grid;
     grid-template-columns: 1fr 1fr;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
+    gap: 0;
 }
 
 .col.advertised {
-    background: #0c1a0c;
-    border-right: 1px solid var(--border);
-    padding: 16px;
+    background: #102315;
+    border-right: 2px solid #2a2d38;
+    padding: 18px;
 }
 
 .col.reality {
-    background: #1a0c0c;
-    padding: 16px;
+    background: #261111;
+    padding: 18px;
 }
 
 .comparison-grid h3 {
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
 }
 
 /* Sub-data Rows Within Grid Output */
