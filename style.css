@@ -62,7 +62,8 @@ body {
 }
 
 .app-wrapper.panel-open .map-section {
-    width: 380px;
+    width: 42%;
+    min-width: 320px;
     flex-shrink: 0;
 }
 
@@ -186,15 +187,16 @@ body {
 }
 
 .calc-panel.visible {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 20px;
-    background: var(--bg-panel);
-    overflow-y: auto;
-    flex: 1;
-    border-left: 1px solid var(--border);
-    max-height: 750px;
+   display: flex;
+   flex-direction: column;
+   gap: 16px;
+   padding: 20px;
+   background: var(--bg-panel);
+   overflow-y: auto;
+   flex: 1;
+   border-left: 1px solid var(--border);
+   max-height: 640px;
+   width: 58%;
 }
 
 /* Custom Scrollbar Styles */
