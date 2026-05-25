@@ -204,16 +204,16 @@ const CITY_DATA = {
 };
 
 const CITY_POSITIONS = {
-    "seattle": { x: 225, y: 105 },
-    "los-angeles": { x: 202, y: 354 },
-    "san-diego": { x: 211, y: 381 },
-    "denver": { x: 433, y: 277 },
-    "okc": { x: 545, y: 350 },
-    "austin": { x: 534, y: 440 },
-    "san-antonio": { x: 518, y: 463 },
-    "detroit": { x: 733, y: 206 },
+    "seattle": { x: 214, y: 87 },
+    "los-angeles": { x: 219, y: 348 },
+    "san-diego": { x: 224, y: 375 },
+    "denver": { x: 448, y: 265 },
+    "okc": { x: 558, y: 352 },
+    "austin": { x: 556, y: 443 },
+    "san-antonio": { x: 543, y: 463 },
+    "detroit": { x: 761, y: 201 },
     "dc": { x: 879, y: 230 },
-    "jacksonville": { x: 801, y: 447 }
+    "jacksonville": { x: 835, y: 418 }
 };
 
 /* ==========================================================================
