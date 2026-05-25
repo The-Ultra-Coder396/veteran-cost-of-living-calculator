@@ -1,1 +1,540 @@
+/* ==========================================================================
+   CSS CUSTOM PROPERTIES (:ROOT)
+   ========================================================================== */
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-panel: #16161e;
+    --text-primary: #e8eaf2;
+    --text-muted: #7a7d8f;
+    --accent-blue: #4a8fd4;
+    --accent-blue-glow: rgba(74, 143, 212, 0.3);
+    --accent-amber: #e6a020;
+    --accent-green: #2ea86e;
+    --accent-red: #d64045;
+    --border: #22242e;
+    --node-default: #3a3d5a;
+}
 
+/* ==========================================================================
+   RESET AND BASE STYLES
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   LAYOUT STRUCTURE (TWO-LEVEL NESTING)
+   ========================================================================== */
+.app-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 750px;
+    display: block;
+}
+
+.app-wrapper.panel-open {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+}
+
+/* ==========================================================================
+   MAP SECTION & HEADER
+   ========================================================================== */
+.map-section {
+    width: 100%;
+    transition: width 0.35s ease;
+}
+
+.app-wrapper.panel-open .map-section {
+    width: 380px;
+    flex-shrink: 0;
+}
+
+.map-header {
+    padding: 20px 20px 12px;
+}
+
+.map-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.map-header .highlight {
+    color: var(--accent-blue);
+}
+
+.map-header .subhead {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+.map-instruction {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding: 8px;
+    opacity: 0.6;
+}
+
+.app-wrapper.panel-open .map-instruction {
+    display: none;
+}
+
+/* ==========================================================================
+   MAP CONTAINER & INTERACTIVE NODES
+   ========================================================================== */
+.map-container {
+    position: relative;
+}
+
+#us-map-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+#map-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.city-node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+}
+
+.node-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--node-default);
+    animation: pulse 2.5s ease-in-out infinite;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.node-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+/* Node States & Keyframe Animations */
+.city-node:hover .node-label {
+    opacity: 1;
+}
+
+.city-node:hover .node-dot {
+    transform: scale(1.6);
+    background: var(--accent-blue);
+}
+
+.city-node.selected .node-dot {
+    background: var(--accent-blue);
+    transform: scale(2);
+    box-shadow: 0 0 0 4px var(--accent-blue-glow);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 var(--accent-blue-glow);
+    }
+    50% {
+        box-shadow: 0 0 0 8px transparent;
+    }
+}
+
+/* ==========================================================================
+   CALCULATOR PANEL BASE
+   ========================================================================== */
+.calc-panel {
+    display: none;
+}
+
+.calc-panel.visible {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: var(--bg-panel);
+    overflow-y: auto;
+    flex: 1;
+    border-left: 1px solid var(--border);
+    max-height: 750px;
+}
+
+/* Custom Scrollbar Styles */
+.calc-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.calc-panel::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.calc-panel::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+/* ==========================================================================
+   PANEL COMPONENT STYLES
+   ========================================================================== */
+
+/* Child 1: Panel Header & Badges */
+.city-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.city-pill {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.close-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--text-primary);
+}
+
+.market-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+/* Market Tier Badges */
+.tier-broken {
+    background: rgba(214, 64, 69, 0.12);
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+}
+.tier-hyper-competitive {
+    background: rgba(230, 160, 32, 0.15);
+    border-color: #f0a824;
+    color: #f0a824;
+}
+.tier-competitive {
+    background: rgba(230, 160, 32, 0.1);
+    border-color: var(--accent-amber);
+    color: var(--accent-amber);
+}
+.tier-moderate {
+    background: rgba(74, 143, 212, 0.12);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+}
+.tier-buyer-friendly {
+    background: rgba(46, 168, 110, 0.12);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+/* Child 2: Crisis Banner */
+.crisis-banner {
+    background: rgba(214, 64, 69, 0.12);
+    border-left: 3px solid var(--accent-red);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+
+.crisis-banner a {
+    color: var(--accent-red);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.crisis-banner a:hover {
+    text-decoration: underline;
+}
+
+/* Child 3: Low Price Warning */
+.low-price-warning {
+    background: rgba(230, 160, 32, 0.1);
+    border-left: 3px solid var(--accent-amber);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--accent-amber);
+}
+
+/* Child 4: Inputs Grid Form Customization */
+.inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.input-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.radio-row {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.radio-row label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text-primary);
+}
+
+/* Custom Checkable Radio Buttons */
+.radio-row input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    outline: none;
+    background: var(--bg-secondary);
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.radio-row input[type="radio"]:hover {
+    border-color: var(--accent-blue);
+}
+
+.radio-row input[type="radio"]::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: 0.1s transform ease-in-out;
+    background-color: var(--accent-blue);
+}
+
+.radio-row input[type="radio"]:checked::before {
+    transform: scale(1);
+}
+
+.radio-row input[type="radio"]:checked {
+    border-color: var(--accent-blue);
+}
+
+/* Target Price Range Slider */
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent-blue);
+    background: var(--bg-secondary);
+    height: 6px;
+    border-radius: 3px;
+    outline: none;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+#price-display {
+    color: var(--accent-blue);
+    font-weight: 700;
+}
+
+/* Child 5: Primary Action Controls */
+.calculate-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.calculate-btn:hover {
+    background: #3a7ec2;
+}
+
+.calculate-btn:active {
+    transform: scale(0.99);
+}
+
+/* Child 6: Dual Results Comparison Matrix */
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.col.advertised {
+    background: #0c1a0c;
+    border-right: 1px solid var(--border);
+    padding: 16px;
+}
+
+.col.reality {
+    background: #1a0c0c;
+    padding: 16px;
+}
+
+.comparison-grid h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Sub-data Rows Within Grid Output */
+.stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Dynamic Color Utilities for Injectable Data Modifiers */
+.green { color: var(--accent-green); }
+.red { color: var(--accent-red); }
+.amber { color: var(--accent-amber); }
+.blue { color: var(--accent-blue); }
+
+/* Context Alert Structural Warnings Outside Default Metrics */
+.warning-row {
+    background: rgba(230, 160, 32, 0.08);
+    border: 1px solid rgba(230, 160, 32, 0.2);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin-top: 8px;
+}
+
+/* Child 7: Environmental / Policy Metadata Context Container */
+.context-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.context-item {
+    padding: 11px 14px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    border-left: 3px solid;
+    background-color: var(--bg-secondary);
+}
+
+.context-item.tax {
+    border-left-color: var(--accent-blue);
+    background: rgba(74, 143, 212, 0.05);
+}
+
+.context-item.healthcare {
+    border-left-color: var(--accent-amber);
+    background: rgba(230, 160, 32, 0.05);
+}
+
+.context-item.foreclosure {
+    border-left-color: var(--accent-red);
+    background: rgba(214, 64, 69, 0.05);
+}
