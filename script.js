@@ -1,8 +1,8 @@
 /* ==========================================================================
    CONSTANTS & BASIC CONFIGURATION
    ========================================================================== */
-const VA_RATE = 6.5;         // Hardcoded 2026 benchmark VA loan interest rate
-const CONV_RATE = 7.0;       // Comparative conventional loan interest rate 
+const VA_RATE = 6.125;         // Hardcoded 2026 benchmark VA loan interest rate
+const CONV_RATE = 6.75;       // Comparative conventional loan interest rate 
 const LOAN_TERM = 30;        // 30-Year fixed rate timeline matrix
 const PMI_RATE = 0.008;      // Standard conventional private mortgage insurance rate (0.8%)
 const MAP_VIEWBOX = { width: 1000, height: 589 };
