@@ -5,6 +5,7 @@ const VA_RATE = 6.5;         // Hardcoded 2026 benchmark VA loan interest rate
 const CONV_RATE = 7.0;       // Comparative conventional loan interest rate 
 const LOAN_TERM = 30;        // 30-Year fixed rate timeline matrix
 const PMI_RATE = 0.008;      // Standard conventional private mortgage insurance rate (0.8%)
+const MAP_VIEWBOX = { width: 1000, height: 589 };
 
 /* ==========================================================================
    CITY DATA SPECIFICATION
@@ -202,6 +203,19 @@ const CITY_DATA = {
     }
 };
 
+const CITY_POSITIONS = {
+    "seattle": { x: 225, y: 105 },
+    "los-angeles": { x: 202, y: 354 },
+    "san-diego": { x: 211, y: 381 },
+    "denver": { x: 433, y: 277 },
+    "okc": { x: 545, y: 350 },
+    "austin": { x: 534, y: 440 },
+    "san-antonio": { x: 518, y: 463 },
+    "detroit": { x: 733, y: 206 },
+    "dc": { x: 879, y: 230 },
+    "jacksonville": { x: 801, y: 447 }
+};
+
 /* ==========================================================================
    HELPER UTILITIES
    ========================================================================== */
@@ -246,11 +260,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* --- City Node Click Router --- */
     document.querySelectorAll('.city-node').forEach(node => {
+        const cityKey = node.getAttribute('data-city');
+        positionCityNode(node, cityKey);
+
         node.addEventListener('click', () => {
             document.querySelectorAll('.city-node').forEach(n => n.classList.remove('selected'));
             node.classList.add('selected');
             
-            const cityKey = node.getAttribute('data-city');
             selectedCityData = CITY_DATA[cityKey];
             isCalculated = false;
             
@@ -272,9 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Initial Panel Visibility Resets
         crisisBanner.hidden = !city.showCrisisBanner;
-        lowPriceWarning.hidden = true;
-        comparisonGrid.hidden = true;
-        contextRows.hidden = true;
+        resetCalculatedOutput();
         
         // Form UI Input Resets
         document.querySelector('input[name="status"][value="active"]').checked = true;
@@ -297,24 +311,41 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedCityData = null;
         isCalculated = false;
         
-        comparisonGrid.hidden = true;
-        contextRows.hidden = true;
         crisisBanner.hidden = true;
-        lowPriceWarning.hidden = true;
+        resetCalculatedOutput();
     });
 
     /* --- Live Slider Engine --- */
     priceSlider.addEventListener('input', (e) => {
         const val = parseInt(e.target.value);
         priceDisplay.textContent = formatCurrency(val);
-        
-        checkLowPriceWarning(val, selectedCityData);
-        
-        // Live updates if user has already calculated numbers once
-        if (isCalculated && selectedCityData) {
-            executeCalculationPipeline();
-        }
+        markInputsChanged();
     });
+
+    document.querySelectorAll('input[name="status"], input[name="disability"], input[name="usage"]').forEach(input => {
+        input.addEventListener('change', markInputsChanged);
+    });
+
+    function positionCityNode(node, cityKey) {
+        const position = CITY_POSITIONS[cityKey];
+        if (!position) return;
+
+        node.style.left = `${(position.x / MAP_VIEWBOX.width) * 100}%`;
+        node.style.top = `${(position.y / MAP_VIEWBOX.height) * 100}%`;
+    }
+
+    function markInputsChanged() {
+        if (!selectedCityData) return;
+        isCalculated = false;
+        resetCalculatedOutput();
+        crisisBanner.hidden = !selectedCityData.showCrisisBanner;
+    }
+
+    function resetCalculatedOutput() {
+        lowPriceWarning.hidden = true;
+        comparisonGrid.hidden = true;
+        contextRows.hidden = true;
+    }
 
     /* --- Dynamic Median Cost Checker --- */
     function checkLowPriceWarning(price, city) {
