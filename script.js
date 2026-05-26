@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
         /* --- UI Render Layer: Environmental Context Matrix --- */
         const taxItem = document.getElementById('tax-context');
         taxItem.className = "context-item tax";
-        let taxHTML = `💰 <strong>Retirement Tax:</strong> ${city.militaryRetirementTax}`;
+        let taxHTML = `<strong>Retirement Tax:</strong> ${city.militaryRetirementTax}`;
         if (city.retirementTaxSavings > 0) {
             taxHTML += ` Annual savings vs. fully-taxed state: ~${formatCurrency(city.retirementTaxSavings)}`;
         } else if (city.retirementTaxSavings < 0) {
@@ -528,15 +528,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const propTaxItem = document.getElementById('propertytax-context');
         propTaxItem.className = "context-item tax";
-        propTaxItem.innerHTML = `🏠 <strong>Property Tax Exemption:</strong> ${city.propertyTaxExemption}`;
+        propTaxItem.innerHTML = `<strong>Property Tax Exemption:</strong> ${city.propertyTaxExemption}`;
 
         const healthItem = document.getElementById('healthcare-context');
         healthItem.className = "context-item healthcare";
-        healthItem.innerHTML = `🏥 <strong>VA Healthcare:</strong> Primary care wait ~${city.vaWaitTimePrimary} days. Specialty care wait ~${city.vaWaitTimeSpecialty} days. Overall rating: ${city.vaHealthcareScore}.`;
+        healthItem.innerHTML = `<strong>VA Healthcare:</strong> Primary care wait ~${city.vaWaitTimePrimary} days. Specialty care wait ~${city.vaWaitTimeSpecialty} days. Overall rating: ${city.vaHealthcareScore}.`;
 
         const foreclosureItem = document.getElementById('foreclosure-context');
         foreclosureItem.className = "context-item foreclosure";
-        foreclosureItem.innerHTML = `⚠ <strong>Local Risk:</strong> ${city.foreclosureRiskNote}`;
+        foreclosureItem.innerHTML = `<strong>Local Risk:</strong> ${city.foreclosureRiskNote}`;
 
         // Unhide Output Grids
         comparisonGrid.hidden = false;
